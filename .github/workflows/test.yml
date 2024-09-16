@@ -19,7 +19,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.9'  # Use Python 3.9 or adjust according to your project's needs
+        python-version: '3.9'  # Adjust according to your project's needs
 
     - name: Install dependencies
       run: |
@@ -27,12 +27,14 @@ jobs:
         pip install -r requirements.txt  # Install your dependencies
 
     - name: Set up Django environment
+      working-directory: ./investment_account  # Adjust this to the directory where manage.py is located
       run: |
         python manage.py makemigrations
         python manage.py migrate  # Apply migrations
 
     - name: Run Django tests
+      working-directory: ./investment_account  # Adjust this to the directory where manage.py is located
       env:
-        DJANGO_SETTINGS_MODULE: your_project.settings  # Replace with your actual settings module
+        DJANGO_SETTINGS_MODULE: investment_account.settings  # Replace with your actual settings module
       run: |
         python manage.py test  # Run the Django test suite
