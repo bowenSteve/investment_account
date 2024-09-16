@@ -14,19 +14,16 @@ from .serializers import (
 )
 from .permissions import IsAllowedToView, IsAllowedToCreate, IsAllowedToUpdateDelete, IsAdmin
 
-# ViewSet for the InvestmentAccount model
 class InvestmentAccountViewSet(viewsets.ModelViewSet):
     queryset = InvestmentAccount.objects.all()
     serializer_class = InvestmentAccountSerializer
-    permission_classes = [IsAuthenticated]  # Ensure the user is logged in
+    permission_classes = [IsAuthenticated]  
 
     def get_permissions(self):
         if self.action == 'retrieve':
-            # Check view permission
             return [IsAuthenticated(), IsAllowedToView()]
         return super().get_permissions()
 
-# ViewSet for the UserInvestmentAccount model (join table)
 class UserInvestmentAccountViewSet(viewsets.ModelViewSet):
     queryset = UserInvestmentAccount.objects.all()
     serializer_class = UserInvestmentAccountSerializer
