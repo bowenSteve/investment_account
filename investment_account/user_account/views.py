@@ -27,26 +27,20 @@ class InvestmentAccountViewSet(viewsets.ModelViewSet):
 class UserInvestmentAccountViewSet(viewsets.ModelViewSet):
     queryset = UserInvestmentAccount.objects.all()
     serializer_class = UserInvestmentAccountSerializer
-    permission_classes = [IsAuthenticated]  # Ensure the user is logged in
+    permission_classes = [IsAuthenticated]  
 
-# ViewSet for the Transaction model
+
 class TransactionViewSet(viewsets.ModelViewSet):
     serializer_class = TransactionSerializer
-    permission_classes = [IsAuthenticated]  # Base authentication requirement
+    permission_classes = [IsAuthenticated]  
 
     def get_queryset(self):
-        """
-        Override get_queryset to filter transactions by investment account.
-        """
         investment_account_pk = self.kwargs.get('investment_account_pk')
         if investment_account_pk:
             return Transaction.objects.filter(investment_account_id=investment_account_pk)
         return Transaction.objects.all()
 
     def get_permissions(self):
-        """
-        Set different permissions based on action.
-        """
         if self.action == 'list' or self.action == 'retrieve':
             return [IsAllowedToView()]
         if self.action == 'create':
@@ -57,7 +51,6 @@ class TransactionViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         investment_account_id = self.kwargs.get('investment_account_pk')
-        # Validate user permissions
         user_inv_acc = UserInvestmentAccount.objects.filter(
             user=self.request.user,
             investment_account_id=investment_account_id,
@@ -66,8 +59,6 @@ class TransactionViewSet(viewsets.ModelViewSet):
 
         if not user_inv_acc:
             raise serializers.ValidationError("You do not have permission to create transactions for this investment account.")
-        
-        # Save the transaction with the correct investment account
         serializer.save(investment_account_id=investment_account_id)
 
 class IsAllowedToCreate(BasePermission):
@@ -89,27 +80,26 @@ class IsAllowedToUpdateDelete(BasePermission):
             can_delete=True
         ).exists()
 
-# ViewSet for the User model (built-in Django user)
+
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [IsAuthenticated]  # Ensure the user is logged in
+    permission_classes = [IsAuthenticated]  
 class AdminUserTransactionsView(APIView):
-    permission_classes = [IsAuthenticated, IsAdmin]  # Ensure only authenticated admins can access
+    permission_classes = [IsAuthenticated, IsAdmin] 
 
     def get(self, request):
         user = request.user
         investment_accounts = InvestmentAccount.objects.filter(userinvestmentaccount__user=user)
         print(f"Authenticated User: {request.user}")
         
-        # Apply date range filter to transactions
+      
         transaction_filter = TransactionFilter(request.GET, queryset=Transaction.objects.filter(investment_account__in=investment_accounts))
         filtered_transactions = transaction_filter.qs
         
-        # Calculate total balance across all accounts
+   
         total_balance = sum(account.get_total_balance() for account in investment_accounts)
-        
-        # Serialize the data
+
         account_serializer = AdminInvestmentAccountSerializer(investment_accounts, many=True)
         transaction_serializer = AdminTransactionSerializer(filtered_transactions, many=True)
         

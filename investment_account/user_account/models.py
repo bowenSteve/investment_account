@@ -21,12 +21,11 @@ class InvestmentAccount(models.Model):
 class UserInvestmentAccount(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     investment_account = models.ForeignKey(InvestmentAccount, on_delete=models.CASCADE)
-    
-    # Permission fields
-    can_view = models.BooleanField(default=False)    # View the account
-    can_create = models.BooleanField(default=False)  # Create transactions
-    can_update = models.BooleanField(default=False)  # Update transactions
-    can_delete = models.BooleanField(default=False)  # Delete transactions
+
+    can_view = models.BooleanField(default=False)   
+    can_create = models.BooleanField(default=False)  
+    can_update = models.BooleanField(default=False)  
+    can_delete = models.BooleanField(default=False) 
 
     class Meta:
         unique_together = ('user', 'investment_account')

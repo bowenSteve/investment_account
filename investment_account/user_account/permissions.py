@@ -3,19 +3,14 @@ from .models import UserInvestmentAccount, Transaction, InvestmentAccount
 
 class IsAllowedToView(BasePermission):
     def has_object_permission(self, request, view, obj):
-        """
-        Check if the user has permission to view the object (Transaction) associated with the investment account.
-        """
-        # Check if obj is a Transaction or InvestmentAccount
+        
         if isinstance(obj, Transaction):
-            # Ensure obj is the investment account
             user_inv_acc = UserInvestmentAccount.objects.filter(
                 user=request.user,
-                investment_account=obj.investment_account  # Assumes `obj` is a Transaction
+                investment_account=obj.investment_account  
             ).first()
             return user_inv_acc and user_inv_acc.can_view
         elif isinstance(obj, InvestmentAccount):
-            # Custom logic for InvestmentAccount view permission if needed
             return UserInvestmentAccount.objects.filter(
                 user=request.user,
                 investment_account=obj,
@@ -54,4 +49,4 @@ from rest_framework.permissions import BasePermission
 
 class IsAdmin(BasePermission):
     def has_permission(self, request, view):
-        return request.user and request.user.is_staff  # or request.user.is_superuser
+        return request.user and request.user.is_staff  

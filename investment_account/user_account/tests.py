@@ -11,25 +11,24 @@ from datetime import timedelta
 class InvestmentAccountAPITestCase(APITestCase):
 
     def setUp(self):
-        # Create test users
         self.user1 = User.objects.create_user(username='user1', password='password123')
         self.user2 = User.objects.create_user(username='user2', password='password123')
         self.admin_user = User.objects.create_superuser(username='admin', password='password123')
 
-        # Create test investment accounts
+   
         self.inv_acc1 = InvestmentAccount.objects.create(account_name='Account 1', account_number='1234567890', balance=1000)
         self.inv_acc2 = InvestmentAccount.objects.create(account_name='Account 2', account_number='0987654321', balance=2000)
 
-        # Create user investment accounts with permissions
+     
         UserInvestmentAccount.objects.create(user=self.user1, investment_account=self.inv_acc1, can_view=True)
         UserInvestmentAccount.objects.create(user=self.user2, investment_account=self.inv_acc2, can_create=True, can_update=True, can_delete=True)
         UserInvestmentAccount.objects.create(user=self.user1, investment_account=self.inv_acc2, can_create=True)
 
-        # Create transactions
+      
         self.transaction1 = Transaction.objects.create(investment_account=self.inv_acc1, transaction_type='deposit', amount=500)
         self.transaction2 = Transaction.objects.create(investment_account=self.inv_acc2, transaction_type='withdrawal', amount=300)
         
-        # Create JWT tokens for users
+        
         self.user1_token = str(RefreshToken.for_user(self.user1).access_token)
         self.user2_token = str(RefreshToken.for_user(self.user2).access_token)
         self.admin_token = str(RefreshToken.for_user(self.admin_user).access_token)
@@ -50,11 +49,11 @@ class InvestmentAccountAPITestCase(APITestCase):
     def test_user_can_create_transaction_with_permission(self):
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.user2_token}')
         response = self.client.post(f'/investment-accounts/{self.inv_acc2.id}/transactions/', data={
-            'investment_account': self.inv_acc2.id,  # Include this field
+            'investment_account': self.inv_acc2.id,  
             'transaction_type': 'deposit',
             'amount': 300
             }, format='json')
-        print(response.data)  # Print response data for debugging
+        print(response.data) 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
 
