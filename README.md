@@ -18,6 +18,7 @@ To run the project locally, ensure you have the following installed:
 * Python 3.8
 * Django Rest Framework (DRF) 4.2
 * SQLite
+* VsCode(or any editor of your choice)
 ### Setup Instructions
   * Clone the repository:
       * `git clone git@github.com:bowenSteve/investment_account.git`
