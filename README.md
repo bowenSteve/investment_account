@@ -27,6 +27,7 @@ To run the project locally, ensure you have the following installed:
       * `pipenv install`
       * `pipenv shell`
   * Configure database:
+      * `cd investment_account`
       * `python manage.py migrate`
   * Create Superuser:
       * `python manage.py createsuperuser`
