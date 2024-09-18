@@ -22,7 +22,7 @@ To run the project locally, ensure you have the following installed:
   * Clone the repository:
       * `git clone git@github.com:bowenSteve/investment_account.git`
       * `cd investment_account`
-  * Install dependencies and acticate virtual environment:
+  * Install dependencies and activate virtual environment:
       * `pipenv install`
       * `pipenv shell`
   * Configure database:
