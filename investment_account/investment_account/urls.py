@@ -25,7 +25,7 @@ transaction_detail = TransactionViewSet.as_view({'get': 'retrieve', 'put': 'upda
 
 
 urlpatterns = [
-    path('admin/user-transactions/', AdminUserTransactionsView.as_view(), name='admin-user-transactions'),
+    path('admin/user-transactions/<int:user_id>/', AdminUserTransactionsView.as_view(), name='admin-user-transactions'),
     path('admin/', admin.site.urls),
     path('', include(router.urls)), 
     path('', include(investment_account_router.urls)), 

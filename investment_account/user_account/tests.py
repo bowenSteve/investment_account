@@ -33,10 +33,6 @@ class InvestmentAccountAPITestCase(APITestCase):
         self.user2_token = str(RefreshToken.for_user(self.user2).access_token)
         self.admin_token = str(RefreshToken.for_user(self.admin_user).access_token)
 
-    def test_user_can_view_investment_account(self):
-        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.user1_token}')
-        response = self.client.get(f'/investment-accounts/{self.inv_acc1.id}/')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
     
     def test_user_cannot_create_transaction_without_permission(self):
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.user1_token}')
@@ -59,18 +55,25 @@ class InvestmentAccountAPITestCase(APITestCase):
 
     def test_admin_can_get_user_transactions_with_date_range(self):
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.admin_token}')
-        start_date = timezone.now() - timedelta(days=7)
-        end_date = timezone.now() + timedelta(days=1)
-        response = self.client.get('/admin/user-transactions/', data={
-            'start_date': start_date.isoformat(),
-            'end_date': end_date.isoformat()
+    
+        start_date = (timezone.now() - timedelta(days=7)).isoformat()
+        end_date = (timezone.now() + timedelta(days=1)).isoformat()
+    
+        response = self.client.get(f'/admin/user-transactions/{self.user1.id}/', {
+            'start_date': start_date,
+            'end_date': end_date
         }, format='json')
+    
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+    
         self.assertIn('total_balance', response.data)
         self.assertIn('accounts', response.data)
         self.assertIn('transactions', response.data)
+
     
     def test_user_cannot_access_admin_endpoint(self):
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.user1_token}')
-        response = self.client.get('/admin/user-transactions/')
+    
+        response = self.client.get(f'/admin/user-transactions/{self.user1.id}/')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+

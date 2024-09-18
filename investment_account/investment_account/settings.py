@@ -48,7 +48,7 @@ REST_FRAMEWORK = {
     ),
 }
 
-# Optional: You can customize JWT settings if needed
+
 from datetime import timedelta
 
 SIMPLE_JWT = {
@@ -57,7 +57,7 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': True,
     'ALGORITHM': 'HS256',
-    'SIGNING_KEY': 'your_secret_key',  # Set to your own secret key or keep it in an env file
+    'SIGNING_KEY': 'your_secret_key',
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
 

@@ -12,7 +12,7 @@ from .serializers import (
     UserSerializer, AdminInvestmentAccountSerializer, AdminTransactionSerializer, TransactionFilter
 
 )
-from .permissions import IsAllowedToView, IsAllowedToCreate, IsAllowedToUpdateDelete, IsAdmin
+from .permissions import IsAllowedToView, IsAllowedToCreate, IsAllowedToUpdateDelete, IsAdmin, DenyViewPermission
 
 class InvestmentAccountViewSet(viewsets.ModelViewSet):
     queryset = InvestmentAccount.objects.all()
@@ -29,24 +29,34 @@ class UserInvestmentAccountViewSet(viewsets.ModelViewSet):
     serializer_class = UserInvestmentAccountSerializer
     permission_classes = [IsAuthenticated]  
 
-
 class TransactionViewSet(viewsets.ModelViewSet):
     serializer_class = TransactionSerializer
     permission_classes = [IsAuthenticated]  
 
     def get_queryset(self):
         investment_account_pk = self.kwargs.get('investment_account_pk')
-        if investment_account_pk:
+        if not investment_account_pk:
+            return Transaction.objects.none()
+
+        user_inv_acc = UserInvestmentAccount.objects.filter(
+            user=self.request.user,
+            investment_account_id=investment_account_pk,
+            can_view=True
+        ).first()
+
+        if user_inv_acc:
             return Transaction.objects.filter(investment_account_id=investment_account_pk)
-        return Transaction.objects.all()
+        else:
+            return Transaction.objects.none()
 
     def get_permissions(self):
-        if self.action == 'list' or self.action == 'retrieve':
-            return [IsAllowedToView()]
+        investment_account_pk = self.kwargs.get('investment_account_pk')
         if self.action == 'create':
             return [IsAllowedToCreate()]
-        if self.action in ['update', 'partial_update', 'destroy']:
+        elif self.action in ['update', 'partial_update', 'destroy']:
             return [IsAllowedToUpdateDelete()]
+        elif self.action in ['list', 'retrieve']:
+            return [IsAllowedToView()]
         return super().get_permissions()
 
     def perform_create(self, serializer):
@@ -60,6 +70,8 @@ class TransactionViewSet(viewsets.ModelViewSet):
         if not user_inv_acc:
             raise serializers.ValidationError("You do not have permission to create transactions for this investment account.")
         serializer.save(investment_account_id=investment_account_id)
+
+
 
 class IsAllowedToCreate(BasePermission):
     def has_permission(self, request, view):
@@ -86,20 +98,23 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]  
 class AdminUserTransactionsView(APIView):
-    permission_classes = [IsAuthenticated, IsAdmin] 
+    permission_classes = [IsAdmin]
 
-    def get(self, request):
-        user = request.user
-        investment_accounts = InvestmentAccount.objects.filter(userinvestmentaccount__user=user)
-        print(f"Authenticated User: {request.user}")
+    def get(self, request, user_id):
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return Response({'error': 'User not found'}, status=404)
         
-      
+        investment_accounts = InvestmentAccount.objects.filter(userinvestmentaccount__user=user)
+        
         transaction_filter = TransactionFilter(request.GET, queryset=Transaction.objects.filter(investment_account__in=investment_accounts))
         filtered_transactions = transaction_filter.qs
         
-   
+        
         total_balance = sum(account.get_total_balance() for account in investment_accounts)
-
+        
+        
         account_serializer = AdminInvestmentAccountSerializer(investment_accounts, many=True)
         transaction_serializer = AdminTransactionSerializer(filtered_transactions, many=True)
         
